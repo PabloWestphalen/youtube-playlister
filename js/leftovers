@@ -1,0 +1,60 @@
+if (event.data == YT.PlayerState.ENDED) {
+		$("#youtube-iframe-player").addClass("ready");
+	}
+
+
+/* old part of getauthor image 
+
+
+	/*$.getJSON("https://www.googleapis.com/youtube/v3/videos", {
+		key: "AIzaSyAYjKYfxvjLdWBj20hTjG93hj35LpUsCus",
+		part: "snippet,statistics,contentDetails,status,topicDetails",
+		id: video
+	}, function(data) {
+		if(data.entry.media$thumbnail) {
+			console.table(data);
+			callback(data.items[0]);
+			//Used with commmented getChannelData method
+			//getChannelData(data.items[0].snippet.channelId, callback, data.items[0])
+
+		} else {
+			console.error("Could not load data for video ", video);
+		}
+	});
+
+
+	http://gdata.youtube.com/feeds/api/users/UC_x5XG1OV2P6uZZ5FSM9Ttw?fields=yt:username,media:thumbnail,title&alt=json
+	var pattern = "https://i3.ytimg.com/i/<CHANNEL_ID>/1.jpg";
+	return pattern.replace("<CHANNEL_ID>", channelID);*/
+
+
+/*function getChannelData(channelId, callback, videoData) {
+	$.getJSON("https://www.googleapis.com/youtube/v3/channels", {
+		key: "AIzaSyAYjKYfxvjLdWBj20hTjG93hj35LpUsCus",
+		part: "brandingSettings",
+		id: channelId
+	}, function(channelData) {
+		console.log("Channel data as follows: \n", channelData);
+		if(channelData.items.length == 1) {
+			console.table(channelData);
+			if(videoData) {
+				videoData.brandingSettings = channelData.items[0].brandingSettings;
+			}
+			callback(videoData);
+		} else {
+			console.error("Could not load data for channel ", channelId);
+		}
+	});
+}*/
+
+
+
+
+	/*//Set video title on page
+	var videoTitle = ytPlayer.getVideoData().title;
+	var videoAuthor = ytPlayer.getVideoData().author;
+	console.log(ytPlayer.getVideoData());
+	console.log('set videoAuthor to ', videoAuthor);
+	document.querySelector(".video-title").textContent = videoTitle;
+	document.querySelector(".video-author").textContent = videoAuthor;
+	console.log('set ', document.querySelector(".video-author"), '\'s textContent to ', videoAuthor);*/

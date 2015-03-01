@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+	<title>
+		Youtube Playlister
+	</title>
+	<link rel="stylesheet" type="text/css" href="css/main.css" />
+	<link rel="stylesheet" href="js/vendor/jquery-ui/jquery-ui.min.css">	
+</head>
+<body>
+	<header class="site-header">
+		<h1>Youtube Playlister</h1>
+	</header>
+	<div class="main-wrapper">
+	
+		<section class="search">
+			<input id="search" name="search" type="text" placeholder="Search video..." />
+		</section>
+
+		<div class="pane-wrapper">
+			<div class="search-area magictime">
+				<section>
+					<ul id="search-results" class="cf">
+						
+					</ul>
+				</section>
+			</div>
+			<div class="now-playing magictime cf">
+				
+				<div class="main-panel">
+					<section id="player-section">
+						<div id="youtube-iframe-player"></div>
+
+						<sidebar id="playlist-sidebar">
+						</sidebar>
+					</section>
+					<section id="video-description-intro" class="pad cf">
+							<img class="channel-thumb" class="channel-thumb">
+							<h1 class="video-title"></h1>
+							<span>by <strong class="video-channel"></strong></span>
+					</section>
+					<section id="video-description-main" class="pad">
+							<strong class="video-publish-date">Published on <span></span></strong>
+							<p class="video-description"></p>
+					</section>
+				</div>
+				<section class="playlist">
+					<header>
+						<h3>Now playing</h3>
+					</header>
+					<ul class="playlist-videos sortable">
+						
+					</ul>
+				</section>
+			</div>
+		</div>
+	</div>
+	<script src="js/vendor/jquery.js"></script>
+	<script src="js/vendor/jquery-ui/jquery-ui.min.js"></script>
+	<script src="js/date.format.prototype.js"></script>
+	<script src="js/arraymove.prototype.js"></script>
+	<script src="js/main.js"></script>
+</body>
+</html>
+
+
