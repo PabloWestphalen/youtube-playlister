@@ -202,11 +202,10 @@ function stopVideo() {
 	ytPlayer.stopVideo();
 }
 
-function getAuthorImage(channelID) {
+function getAuthorImage(channelID, callback) {
 	var url;
 	$.ajax({
   		dataType: "json",
-  		async: false,
   		url: "http://gdata.youtube.com/feeds/api/users/" + channelID,
   		data: {
 			fields: "media:thumbnail",
@@ -215,6 +214,9 @@ function getAuthorImage(channelID) {
   		success: function(data) {
   			if(data.entry["media$thumbnail"]) {
 				url = data.entry["media$thumbnail"].url;
+				if(callback) {
+					callback(url);
+				}
   			} else {
 				console.log("Could not load channel image for channel", channelID);
   			}
@@ -223,7 +225,6 @@ function getAuthorImage(channelID) {
   			console.error("Could execute request [get channel image] for channel [", channelID, "]");
   		}
 	});
-	return url;
 }
 
 
@@ -239,13 +240,15 @@ function getVideoData(video, callback) {
 		id: video
 	}, function(data) {
 		if(data.items.length == 1) {
-			data.items[0].channelImage = getAuthorImage(data.items[0].snippet.channelId);
-			cachedVideos[video] = data.items[0];
-			if(callback) {
-				callback(data.items[0]);	
-			} else {
-				console.error("You must specify a callback for when the data for this video is loaded");
-			}
+			getAuthorImage(data.items[0].snippet.channelId, function(channeThumb) {
+				data.items[0].channelImage = channeThumb;
+				cachedVideos[video] = data.items[0];
+				if(callback) {
+					callback(data.items[0]);	
+				} else {
+					console.error("You must specify a callback for when the data for this video is loaded");
+				}	
+			});
 		} else {
 			console.error("Could not load data for video ", video);
 		}
