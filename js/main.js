@@ -15,7 +15,10 @@ var Keys = {
 var cachedVideos = {};
 
 var initialVideos = [];
-if (localStorage.getItem("playlist")) {
+
+if (document.location.search) {
+    initialVideos = JSON.parse(decodeURIComponent(document.location.search.replace("?playlist=", "")));
+} else if (localStorage.getItem("playlist")) {
     initialVideos = JSON.parse(localStorage.getItem("playlist"));
 }
 
@@ -113,6 +116,8 @@ function addEvents() {
         if (playlist.videos.length == 0) {
             hideGuide();
         }
+        hideGuide();
+        showNowPlaying();
 
         var video = $(this).attr("data-video-id");
         addVideoToPlaylist(video);
@@ -170,7 +175,15 @@ function addEvents() {
             $(".playlist-videos").empty();
             showGuide();
         }
+    });
 
+    $(".share-playlist").on("click", function () {
+        var shareURL = location.origin + location.pathname + "?playlist=" + JSON.stringify(playlist.videos);
+        $("#share-playlist-url").val(shareURL);
+        $("#dialog").dialog({
+            modal: true,
+        });
+        $("#share-playlist-url").select();
     });
 }
 
