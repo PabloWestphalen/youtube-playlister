@@ -40,11 +40,13 @@ function addEvents() {
 		out: function(e, ui) { sortableIn = 0; },
 		beforeStop: function(e, ui) {
 			if (sortableIn == 0) {
-				playlist.videos.splice(ui.item.index(), 1);
-				if(ui.item.hasClass("playing-vid")) {
-					playVideo(ui.item.index());
-				}	
-				ui.item.remove();				
+				var index = ui.item.index();
+				var wasCurrent = ui.item.hasClass("playing-vid");
+				ui.item.remove();
+				playlist.videos.splice(index, 1);
+				if(wasCurrent) {
+					playVideo(index);
+				}				
 			}			
 		}
 	});
@@ -79,8 +81,6 @@ function showNowPlaying() {
 }
 
 function doSearch(query) {
-	console.log("Looking for: ", query);
-
 	$.getJSON("https://www.googleapis.com/youtube/v3/search", {
 		key: "AIzaSyAYjKYfxvjLdWBj20hTjG93hj35LpUsCus",
 		part: "id",
@@ -164,12 +164,11 @@ function onYouTubeIframeAPIReady() {
 }
 
 function playVideo(index) {
-	console.log("playVideo received this index", index, "list currently has ", $(".playlist-videos li").length, "videos");
 	currentVideo = playlist.videos[index];
 	playlist.currentVideo = index;
 	ytPlayer.loadVideoById(currentVideo);
 	$(".playing-vid").removeClass("playing-vid");
-	$(".playlist-videos li").eq(index).addClass("playing-vid");
+	$(".playlist-videos li:not(.ui-sortable-placeholder)").eq(index).addClass("playing-vid");
 	updateVideoData(cachedVideos[currentVideo]);
 }
 
