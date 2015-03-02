@@ -11,7 +11,33 @@ var Keys = {
 }
 
 var cachedVideos = {};
-var initialVideos = ["R8RnMK06EmM", "qRs0MrfDhmw"];
+
+var initialVideos = [];
+if(localStorage.getItem("playlist")) {
+	initialVideos = JSON.parse(localStorage.getItem("playlist"));
+}
+
+function showGuide() {
+	$("#youtube-iframe-player").hide();
+	$("#empty-message").show();
+	$(".playlist header h3").text("Playlist");
+	$("#video-description-intro").hide();
+	$("#video-description-main").hide();
+	$(".playlist-videos").empty();
+}
+
+function hideGuide() {
+	$("#youtube-iframe-player").show();
+	$("#empty-message").hide();
+	$(".playlist header h3").text("Now playing");
+	$("#video-description-intro").show();
+	$("#video-description-main").show();
+	$("#background").css("background-image", "");	
+}
+
+if(!window.initialVideos || initialVideos.length == 0) {
+	showGuide();
+}
 
 $(document).ready(function() {
 	init();
@@ -22,19 +48,31 @@ function init() {
 	addEvents();
 }
 
+function preloadAlbumArts() {
+	setTimeout(function() {
+		playlist.videos.forEach(getAlbumart);
+	}, 2000);	
+}
+
 function addEvents() {
 	$(".sortable").sortable({
 		start: function(event, ui) {
 	        $(this).attr("data-previndex", ui.item.index());
 	    },
 	    update: function(event, ui) {
+	    	
 	    	var newIndex = ui.item.index();
 	    	var oldIndex = $(this).attr("data-previndex");
+	    	console.log("Old index: ", oldIndex, ", newIndex: ", newIndex);
 	        $(this).removeAttr("data-previndex");
 	        playlist.videos.move(oldIndex, newIndex);
-	        playlist.currentVideo = newIndex;
+	        
 		},
-		stop: function (e, ui) { reindexPlaylist(); },
+		stop: function (e, ui) {
+			reindexPlaylist();
+			playlist.currentVideo = $(".playlist-videos .playing-vid:not(.ui-sortable-placeholder)").index();
+			localStorage.setItem("playlist", JSON.stringify(playlist.videos));
+		},
 		receive: function(e, ui) { sortableIn = 1; },
 		over: function(e, ui) { sortableIn = 1; },
 		out: function(e, ui) { sortableIn = 0; },
@@ -44,6 +82,10 @@ function addEvents() {
 				var wasCurrent = ui.item.hasClass("playing-vid");
 				ui.item.remove();
 				playlist.videos.splice(index, 1);
+				if(playlist.videos.length == 0) {
+					showGuide();
+				}
+				localStorage.setItem("playlist", JSON.stringify(playlist.videos));
 				if(wasCurrent) {
 					playVideo(index);
 				}				
@@ -60,8 +102,22 @@ function addEvents() {
 	});
 
 	$("#search-results").on("click", "li", function() {
+		if(playlist.videos.length == 0) {
+			hideGuide();		
+		}
+
 		var video = $(this).attr("data-video-id");
 		addVideoToPlaylist(video);
+
+		if(playlist.videos.length == 1) {
+			playVideo(0);
+		}
+
+		if(ytPlayer.getPlayerState() == YT.PlayerState.ENDED) {
+			if(playlist.currentVideo == playlist.videos.length-2) {
+				playVideo(playlist.videos.length-1);
+			}
+		}
 	});
 
 	$(".playlist-videos").on("click", "li", function() {
@@ -169,15 +225,29 @@ function playVideo(index) {
 	ytPlayer.loadVideoById(currentVideo);
 	$(".playing-vid").removeClass("playing-vid");
 	$(".playlist-videos li:not(.ui-sortable-placeholder)").eq(index).addClass("playing-vid");
-	updateVideoData(cachedVideos[currentVideo]);
+	var videoData = cachedVideos[currentVideo];
+	updateVideoData(videoData);
+	
+	getAlbumart(currentVideo, function(image) {
+		var img = new Image();
+		img.src = image;
+		img.onload = function() {
+			$("#background").css("background-image", "url(" + image + ")");	
+		}		
+	});
+
 }
 
 function onPlayerReady(event) {
-	loadVideos(initialVideos, function() {
-		initialVideos.forEach(addVideoToPlaylist);
-		playVideo(0);
-		updateVideoData(cachedVideos[currentVideo]);
-	});
+	if(window.initialVideos) {
+		loadVideos(initialVideos, function() {
+			initialVideos.forEach(addVideoToPlaylist);
+			preloadAlbumArts();
+			playVideo(0);
+			updateVideoData(cachedVideos[currentVideo]);
+		});	
+	}
+	
 }
 
 function updateCurrentVideo() {
@@ -227,6 +297,59 @@ function getAuthorImage(channelID, callback) {
 	});
 }
 
+function isFunction(obj) {
+	return !!(obj && obj.constructor && obj.call && obj.apply);
+}
+
+function getAlbumart(video, callback) {
+	var videoData = cachedVideos[video];
+
+	if(videoData.albumart) {
+		if(callback) {
+			callback(videoData.albumart);
+		}
+		return;
+	}
+
+	var artist = videoData.snippet.title.split(" - ")[0];
+	var track = videoData.snippet.title.split(" - ")[1];
+
+
+
+	$.ajax({
+	  dataType: "xml",
+	  url: "http://musicbrainz.org/ws/2/recording/?query=" + track + "+artist:" + artist + "&limit=1",
+	  success: function(xml) {
+	    if(xml) {
+	      console.log('got this xml: ', xml);
+	      var mbid = $(xml).find('release').attr('id');
+	      console.log('got this mbid: ', mbid);
+	      $.getJSON("api?coverfor=" + mbid,
+	      function(data) {
+	        if(data.url) {
+	          var image = data.url;
+	          console.log('got this image: ', image);
+	          videoData.albumart = image;
+	          if(callback && isFunction(callback)) {
+	          	callback(image);	
+	          }
+	          
+	        } else {
+	          console.error("Could not image for mbid ", mbid);
+	        }
+	      }, function(error) {
+	        console.error("Could execute request [get cover art] for mbid [", mbid, "]");
+	      });
+	    } else {
+	    console.log("Could not load channel image for channel", channelID);
+	    }
+	  },
+	  error: function() {
+	    console.error("Could execute request [get album mbid]");
+	  }
+	});
+}
+
 
 function getVideoData(video, callback) {
 	if(cachedVideos[video]) {
@@ -273,6 +396,7 @@ function loadVideos(videos, callback) {
 
 function addVideoToPlaylist(video, index) {
 	playlist.videos.push(video);
+	localStorage.setItem("playlist", JSON.stringify(playlist.videos));
 	var template = '<li class="cf"><div class="playlist-video-index"><INDEX></div><div class="playlist-video-thumb">' + 
 						'<img src="<THUMBNAIL>" />' +
 					'</div>' +

@@ -8,9 +8,11 @@
 	<link rel="stylesheet" href="js/vendor/jquery-ui/jquery-ui.min.css">	
 </head>
 <body>
+	<div id="background"></div>
 	<header class="site-header">
-		<h1>Youtube Playlister</h1>
+			<h1>Youtube Playlister</h1> by Pablo Westphalen <a href="https://github.com/PabloWestphalen/youtube-playlister" target="_blank"><img class="link-icon" src="image/github-icon.png" /></a>
 	</header>
+
 	<div class="main-wrapper">
 	
 		<section class="search">
@@ -29,6 +31,10 @@
 				
 				<div class="main-panel">
 					<section id="player-section">
+						<div id="empty-message">
+	    					<p>You don't have any videos yet!</p>
+	    					<p>Search for some and add them to your playlist.</p>
+    					</div>
 						<div id="youtube-iframe-player"></div>
 
 						<sidebar id="playlist-sidebar">
