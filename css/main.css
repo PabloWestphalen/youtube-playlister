@@ -107,21 +107,19 @@ section {
 .playlist header {
 	background-color: #1A1A1A;
 	color: #fff;
-	padding: 1em;
+	padding: 0.5em 1em;
 
 }
 
 .playlist header h3 {
 	font-weight: normal;
-	padding-bottom: 10px;
-	border-bottom: solid 1px #fff;
 }
 
 .playlist-videos {
 	background-color: #222222;
 	min-height: 200px;
 	color: #fff;
-	height: 325px;
+	height: 313px;
 	list-style: none;
 	width: 100%;
 	overflow-y: scroll;
@@ -266,4 +264,52 @@ section {
 	height: 20px;
 	right: 20px;
 	top: 5px;
+}
+
+
+.playlist-actions {
+	padding: 0.5em 1em;
+	list-style: none;
+	background-color: #222222;
+	width: 100%;
+}
+
+.playlist-actions li {
+    background-image: url(../image/youtube-sprite.webp);
+    background-repeat: no-repeat;
+    width: 23px;
+    height: 23px;
+    margin-right: 20px;
+    float: left;
+    opacity: 0.2;
+}
+
+.toggle-shuffle {
+	background-position: -139px -169px;	
+}
+
+.toggle-repeat {
+	background-position: -91px -125px;
+	color: blue;
+}
+
+.clear-playlist {
+	background-image: url(../image/trash.png) !important;
+	background-size: 23px 23px;
+	opacity: 0.8 !important;
+}
+
+
+.toggle-repeat:hover, .toggle-shuffle:hover, .toggle-repeat.active, .toggle-shuffle.active {
+	opacity: 0.3;
+	cursor: pointer;
+}
+
+.playlist-actions .active  {
+	border-bottom: solid 1px #fff;
+}
+
+.clear-playlist:hover{
+	opacity: 1 !important;
+	cursor: pointer;
 }

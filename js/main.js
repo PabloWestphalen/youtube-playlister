@@ -3,7 +3,9 @@ var currentVideo;
 var videoData;
 var playlist = {
 	videos: [],
-	currentVideo: 0
+	currentVideo: 0,
+	isShuffled: false,
+	isCyclical: false
 };
 
 var Keys = {
@@ -128,6 +130,41 @@ function addEvents() {
 		if(event.target === this) {
 			showNowPlaying();
 		}
+	});
+
+	$(".toggle-shuffle").on("click", function() {
+		var el = $(this);
+		if(el.hasClass("active")) {
+			el.removeClass("active");
+			playlist.isShuffled = false;
+		} else {
+			el.addClass("active");
+			playlist.isShuffled = true;
+		}
+	});
+
+	$(".toggle-repeat").on("click", function() {
+		var el = $(this);
+		if(el.hasClass("active")) {
+			el.removeClass("active");
+			playlist.isCyclical = false;
+		} else {
+			el.addClass("active");
+			playlist.isCyclical = true;
+		}
+	});
+
+	$(".clear-playlist").on("click", function() {
+		var check = confirm("Are you sure you want to clear this playlist?");
+		if(check) {
+			ytPlayer.stopVideo();
+			playlist.videos = [];
+			localStorage.setItem("playlist", "[]");
+			playlist.currentVideo = 0;
+			$(".playlist-videos").empty();
+			showGuide();
+		}
+
 	});
 }
 
@@ -254,14 +291,52 @@ function updateCurrentVideo() {
 	currentVideo = ytPlayer.getVideoUrl().split("v=")[1];
 }
 
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 function onPlayerStateChange(event) {
 	if (event.data == YT.PlayerState.PLAYING) {
 		$("#youtube-iframe-player").addClass("ready");
 	}
 	if (event.data == YT.PlayerState.ENDED) {
-		if(playlist.currentVideo < playlist.videos.length - 1) {
-			currentVideo = playlist.videos[playlist.currentVideo+1];
-			playlist.currentVideo += 1;
+		var hasNext = false;
+
+		if(playlist.isShuffled) {
+			console.log("Playlist is shuffled.");
+			if(playlist.currentVideo < playlist.videos.length - 1) { // Check if there's a next video.
+				console.log("There is a next video (i.e: i'm not in the lat one)");
+				var nextVideo = getRandomInt(playlist.currentVideo+1, playlist.videos.length-1);
+				console.log('calculatged nextVideo to ', nextVideo);
+				playlist.currentVideo = nextVideo;
+				currentVideo = playlist.videos[nextVideo];
+				hasNext = true;
+			} else if(playlist.currentVideo == playlist.videos.length-1) { // Check if at end of playlist
+				if(playlist.isCyclical) {
+					console.log("at the end of playlist, but since i'm cyclical, i'll choose a random video from the beggining");
+					var nextVideo = getRandomInt(0, playlist.videos.length-1);
+					playlist.currentVideo = nextVideo;
+					currentVideo = playlist.videos[nextVideo];
+					hasNext = true;
+				} else {
+					console.log("at end of playlist. shuffle is on, but since its not cyclical, this is the end");
+				}
+			}
+		} else { // Not shuffled, proceed to default behavior
+			if(playlist.currentVideo < playlist.videos.length - 1) { // Check if there's a next video.
+				currentVideo = playlist.videos[playlist.currentVideo+1];
+				playlist.currentVideo += 1;
+				hasNext = true;
+			} else if(playlist.currentVideo == playlist.videos.length-1) { // Check if at end of playlist
+				if(playlist.isCyclical) {
+					currentVideo = playlist.videos[0];
+					playlist.currentVideo = 0;
+					hasNext = true;
+				}
+			}
+		}
+
+		if(hasNext) {
 			playVideo(playlist.currentVideo);
 			getVideoData(currentVideo, updateVideoData);
 		}
