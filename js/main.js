@@ -303,23 +303,17 @@ function onPlayerStateChange(event) {
 		var hasNext = false;
 
 		if(playlist.isShuffled) {
-			console.log("Playlist is shuffled.");
 			if(playlist.currentVideo < playlist.videos.length - 1) { // Check if there's a next video.
-				console.log("There is a next video (i.e: i'm not in the lat one)");
 				var nextVideo = getRandomInt(playlist.currentVideo+1, playlist.videos.length-1);
-				console.log('calculatged nextVideo to ', nextVideo);
 				playlist.currentVideo = nextVideo;
 				currentVideo = playlist.videos[nextVideo];
 				hasNext = true;
 			} else if(playlist.currentVideo == playlist.videos.length-1) { // Check if at end of playlist
 				if(playlist.isCyclical) {
-					console.log("at the end of playlist, but since i'm cyclical, i'll choose a random video from the beggining");
 					var nextVideo = getRandomInt(0, playlist.videos.length-1);
 					playlist.currentVideo = nextVideo;
 					currentVideo = playlist.videos[nextVideo];
 					hasNext = true;
-				} else {
-					console.log("at end of playlist. shuffle is on, but since its not cyclical, this is the end");
 				}
 			}
 		} else { // Not shuffled, proceed to default behavior
