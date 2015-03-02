@@ -14,7 +14,7 @@ html {
 
 body {
 	font-family: "Arial";
-	background-color: #f1f1f1;
+	background-color: /* #f1f1f1;*/
 	min-height: 100vh;
 	overflow-y: scroll;
 }
